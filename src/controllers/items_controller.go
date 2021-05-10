@@ -7,16 +7,28 @@ import (
 	"github.com/aditya43/golang-bookstore_items-api/src/domain/items"
 )
 
-func Create(w http.ResponseWriter, r *http.Request) {
+var (
+	ItemsController itemsControllerInterface = &itemsController{}
+)
+
+type itemsControllerInterface interface {
+	Create(w http.ResponseWriter, r *http.Request)
+	Get(w http.ResponseWriter, r *http.Request)
+}
+
+type itemsController struct {
+}
+
+func (cont *itemsController) Create(w http.ResponseWriter, r *http.Request) {
 	if err := oauth.AuthenticateRequest(r); err != nil {
 		return
 	}
 
-	item := &items.Item{
+	_ = &items.Item{
 		Seller: oauth.GetUserId(r),
 	}
 }
 
-func Get(w http.ResponseWriter, r *http.Request) {
+func (cont *itemsController) Get(w http.ResponseWriter, r *http.Request) {
 
 }

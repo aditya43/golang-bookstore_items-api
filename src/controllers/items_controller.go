@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/aditya43/bookstore-oauth-go/oauth"
 	"github.com/aditya43/golang-bookstore_items-api/src/domain/items"
 	"github.com/aditya43/golang-bookstore_items-api/src/services"
+	"github.com/aditya43/golang-bookstore_items-api/src/utils/errors"
+	"github.com/aditya43/golang-bookstore_items-api/src/utils/http_utils"
 )
 
 var (
@@ -23,9 +24,11 @@ type itemsController struct {
 
 func (cont *itemsController) Create(w http.ResponseWriter, r *http.Request) {
 	if err := oauth.AuthenticateRequest(r); err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(err.Status)
-		json.NewEncoder(w).Encode(err)
+		http_utils.SendErrorResponse(w, errors.RESTErr{
+			Message: err.Message,
+			Status:  err.Status,
+			Error:   err.Error,
+		})
 		return
 	}
 
@@ -35,15 +38,11 @@ func (cont *itemsController) Create(w http.ResponseWriter, r *http.Request) {
 
 	result, err := services.ItemsService.Create(item)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(err.Status)
-		json.NewEncoder(w).Encode(err)
+		http_utils.SendErrorResponse(w, *err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(result)
+	http_utils.SendJsonResponse(w, http.StatusCreated, result)
 }
 
 func (cont *itemsController) Get(w http.ResponseWriter, r *http.Request) {

@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/aditya43/bookstore-oauth-go/oauth"
@@ -32,13 +34,26 @@ func (cont *itemsController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item := &items.Item{
-		Seller: oauth.GetUserId(r),
+	requestBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		restErr := errors.BadRequestErr("Invalid request body")
+		http_utils.SendErrorResponse(w, *restErr)
+		return
+	}
+	defer r.Body.Close()
+
+	var itemRequest items.Item
+	if err := json.Unmarshal(requestBody, &itemRequest); err != nil {
+		restErr := errors.BadRequestErr("Invalid JSON body")
+		http_utils.SendErrorResponse(w, *restErr)
+		return
 	}
 
-	result, err := services.ItemsService.Create(item)
+	itemRequest.Seller = oauth.GetUserId(r)
+
+	result, createErr := services.ItemsService.Create(itemRequest)
 	if err != nil {
-		http_utils.SendErrorResponse(w, *err)
+		http_utils.SendErrorResponse(w, *createErr)
 		return
 	}
 

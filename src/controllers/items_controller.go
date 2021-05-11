@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/aditya43/bookstore-oauth-go/oauth"
@@ -21,6 +22,9 @@ type itemsController struct {
 
 func (cont *itemsController) Create(w http.ResponseWriter, r *http.Request) {
 	if err := oauth.AuthenticateRequest(r); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(err.Status)
+		json.NewEncoder(w).Encode(err)
 		return
 	}
 

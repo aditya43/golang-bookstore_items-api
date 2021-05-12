@@ -42,7 +42,7 @@ func (cont *itemsController) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var itemRequest items.Item
+	var itemRequest *items.Item
 	if err := json.Unmarshal(requestBody, &itemRequest); err != nil {
 		restErr := errors.BadRequestErr("Invalid JSON body")
 		http_utils.SendErrorResponse(w, *restErr)
